@@ -56,4 +56,31 @@ app.post('/bkash/create-payment', async (req, res) => {
     });
 
     res.json(paymentRes.data);
-  } catch (
+  } catch (err) {
+    res.status(500).send(err.response?.data || err.message);
+  }
+});
+
+// 3. Execute Payment (called after user approves payment)
+app.post('/bkash/execute-payment', async (req, res) => {
+  const { paymentID } = req.body;
+
+  try {
+    const execRes = await axios.post(`${bkashConfig.base_url}/tokenized/checkout/execute`, {
+      paymentID,
+    }, {
+      headers: {
+        authorization: id_token,
+        'x-app-key': bkashConfig.app_key,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    res.json(execRes.data);
+  } catch (err) {
+    res.status(500).send(err.response?.data || err.message);
+  }
+});
+
+app.listen(4242, () => console.log('Server running on http://localhost:4242'));
+
