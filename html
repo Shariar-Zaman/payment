@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>bKash Payment</title>
+</head>
+<body>
+  <h2>Pay 10 BDT via bKash</h2>
+  <button id="pay-button">Pay with bKash</button>
+
+  <script>
+    document.getElementById('pay-button').addEventListener('click', async () => {
+      const res = await fetch('http://localhost:4242/bkash/create-payment', { method: 'POST' });
+      const data = await res.json();
+
+      if (data && data.paymentID && data.bkashURL) {
+        window.open(data.bkashURL, '_blank');
+
+        // Wait 10s and then execute payment
+        setTimeout(async () => {
+          const execRes = await fetch('http://localhost:4242/bkash/execute-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentID: data.paymentID }),
+          });
+          const execData = await execRes.json();
+          alert('Payment Status: ' + execData.transactionStatus);
+        }, 10000);
+      } else {
+        alert('Payment creation failed!');
+      }
+    });
+  </script>
+</body>
+</html>
